@@ -2,12 +2,13 @@
 Shared pytest fixtures.
 
 Uses a separate in-memory SQLite database for tests, and overrides FastAPI's
-get_db dependency so tests never touch the real tasks.db file. Each test
+get_db depndency so tests never touch the real tasks.db file. Each test
 gets fresh tables (created/dropped per test) so tests can't leak state into
 one another.
 """
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.pool import StaticPool
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -19,6 +20,7 @@ TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
     TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
